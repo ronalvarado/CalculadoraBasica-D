@@ -3,6 +3,10 @@
         <string name="app_name">Sensor De Proximidad</string>
         <string name="sensor">SENSOR DE PROXIMIDAD</string>
 
+        <string name="Calculadora">Calculadora</string>
+        <string name="Num1">ingrese una cantidad</string>
+        <string name="Num2">ingrese una cantidad</string>
+
         <string-array name="operaciones">
                 <item>selecionar:</item>
                 <item>suma </item>
