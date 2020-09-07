@@ -3,4 +3,40 @@
         <string name="app_name">Sensor De Proximidad</string>
         <string name="sensor">SENSOR DE PROXIMIDAD</string>
 
+        <string-array name="operaciones">
+                <item>selecionar:</item>
+                <item>suma </item>
+                <item>resta </item>
+                <item>divicion </item>
+                <item>multiplicacion</item>
+                <item>exponenciacion</item>
+                <item>porcentaje</item>
+                <item>mood</item>
+                <item>factorial</item>
+        </string-array>
+
+
+        <string-array name="Area">
+                <item>Pie Cuadrado</item>
+                <item>Vara Cuadrada</item>
+                <item>Yarda Cuadrada</item>
+                <item>Metro Cuadrado</item>
+                <item>Tareas</item>
+                <item>Manzana</item>
+                <item>Hectaria</item>
+
+        </string-array>
+
+
+        <string-array name="Areas">
+                <item>Pie cuadrado</item>
+                <item>Vara cuadrada</item>
+                <item>Yarda cuadrada</item>
+                <item>Metro cuadrado</item>
+                <item>Tareas</item>
+                <item>Manzana</item>
+                <item>Hectáreas</item>
+
+        </string-array>
+
 </resources>

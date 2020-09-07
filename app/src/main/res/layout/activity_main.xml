@@ -1,20 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-    <TextView
-        android:id="@+id/tvSensor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SENSOR DE PROXIMIDAD"
-        android:textSize="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TabHost
+        android:id="@+id/tbhConversores"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="83dp"
+
+                />
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <RelativeLayout
+                    android:id="@+id/tabAREA"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/tvdearea"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="150dp"
+                        android:layout_marginTop="40dp"
+                        android:text="De:"
+                        android:textSize="20dp" />
+
+                    <Spinner
+                        android:id="@+id/spnDe"
+                        android:layout_width="257dp"
+                        android:layout_height="50dp"
+                        android:layout_marginLeft="80dp"
+                        android:layout_marginTop="80dp"
+                        android:entries="@array/Area" />
+
+                    <TextView
+                        android:id="@+id/tvaarea"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="150dp"
+                        android:layout_marginTop="140dp"
+                        android:text="A:"
+                        android:textSize="20dp" />
+
+                    <Spinner
+                        android:id="@+id/spnA"
+                        android:layout_width="257dp"
+                        android:layout_height="45dp"
+                        android:layout_marginLeft="80dp"
+                        android:layout_marginTop="180dp"
+                        android:entries="@array/Area" />
+
+                    <EditText
+                        android:id="@+id/etCANTIDADA"
+                        android:layout_width="394dp"
+                        android:layout_height="44dp"
+                        android:layout_marginLeft="0dp"
+                        android:layout_marginTop="250dp"
+                        android:ems="10"
+                        android:hint="CANTIDAD" />
+
+                    <TextView
+                        android:id="@+id/lblRESPUESTA"
+                        android:layout_width="146dp"
+                        android:layout_height="35dp"
+                        android:layout_marginLeft="120dp"
+                        android:layout_marginTop="380dp"
+                        android:text="Respuesta:"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btnCONVERTIR"
+                        android:layout_width="283dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="50dp"
+                        android:layout_marginTop="295dp"
+                        android:onClick="convertir"
+                        android:text="CONVERTIR"
+                        android:textColor="@android:color/background_light"
+                        android:textSize="18dp" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/tabCONVERSORPROPIO"
+                    android:layout_width="match_parent"
+                    android:layout_height="674dp"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <EditText
+                        android:id="@+id/etCANTIDAD"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="60dp"
+                        android:hint="CANTIDAD"
+                        android:inputType="numberDecimal" />
+
+                    <EditText
+                        android:id="@+id/etUNIDADES"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="120dp"
+                        android:hint="UNIDADES"
+                        android:inputType="numberDecimal" />
+
+                    <EditText
+                        android:id="@+id/etUNIDADES2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="180dp"
+                        android:hint="UNIDADES"
+                        android:inputType="numberDecimal" />
+
+                    <Button
+                        android:id="@+id/btnProcesar"
+                        android:layout_width="396dp"
+                        android:layout_height="73dp"
+                        android:layout_marginTop="240dp"
+                        android:onClick="procesar"
+                        android:text="Convertir"
+                        android:textColor="@android:color/background_light" />
+
+                </RelativeLayout>
+
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+
+
+
+
+
+</RelativeLayout>
 

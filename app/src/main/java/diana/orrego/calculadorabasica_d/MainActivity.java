@@ -11,70 +11,84 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
-    // 1.- Variables
-    // hace la comunicación con el hardware
-    SensorManager sensorManager;
-    // para representar al sensor
-    Sensor sensor;
-    // para determinar si algo de acerca al dispositivo
-    SensorEventListener sensorEventListener;
+    Conversores conversor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        // Enlace de la variable TextView con la vista
-        final TextView texto = (TextView)findViewById(R.id.tvSensor);
-        // 2.- Aplicando el servicio
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        // El tipo de sensor que se utiliza
-        sensor =
-                sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        // Verificar si el dispositivo tiene este tipo de sensor.
-        // si no lo tiene hayq e terminar la acción
-        if(sensor==null)finish();
-        // llamamos al evento Listener para determinar determinar los cambios
-                sensorEventListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                if(sensorEvent.values[0] < sensor.getMaximumRange()){
+        TabHost tbhConversor = (TabHost) findViewById(R.id.tbhConversores);
+        tbhConversor.setup();
+        String str = "Universal";
+        tbhConversor.addTab(tbhConversor.newTabSpec(str).setIndicator(str, null).setContent(R.id.tabCONVERSORPROPIO));
+        String str2 = "Area";
+        tbhConversor.addTab(tbhConversor.newTabSpec(str2).setIndicator(str2, null).setContent(R.id.tabAREA));
 
-                    getWindow().getDecorView().setBackgroundColor(Color.RED);
-                    texto.setText("CAMBIANDO A COLOR ROJO");
-                }else{
+    }
+    public void procesar(View v) {
+///
+        TextView temp = (TextView) findViewById(R.id.etUNIDADES);
+        String str = "";
+        int UNIDADES = temp.getText().toString().equals(str) ? 1 : Integer.parseInt(temp.getText().toString());
+        TextView temp2 = (TextView) findViewById(R.id.etCANTIDAD);
+        TextView valor = (TextView) findViewById(R.id.etUNIDADES2);
+        String str2 = "/";
+        if (!temp2.getText().toString().equals(str)) {
+            int CANTIDAD = Integer.parseInt(temp2.getText().toString());
+            int CAJAS = CANTIDAD / UNIDADES;
+            StringBuilder sb = new StringBuilder();
+            sb.append(CAJAS);
+            sb.append(str2);
+            sb.append(CANTIDAD % UNIDADES);
+            valor.setText(sb.toString());
+        }
+        else if (!valor.getText().toString().equals(str))
+        {
+            String[] data = valor.getText().toString().split(str2);
+            StringBuilder sb2 = new StringBuilder();
+            sb2.append(str);
+            sb2.append((Integer.parseInt(data[0]) * UNIDADES) + Integer.parseInt(data[1]));
+            temp2.setText(sb2.toString());
+        }
 
-                    getWindow().getDecorView().setBackgroundColor(Color.GREEN);
-                    texto.setText("SENSOR DE PROXIMIDAD");
-                }
-            }
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-            }
-        }; // Agregamos el punto y coma
-        // 4.-
-        start();
-    }//End: OnCreate.
-    // 3.-
-    public void start(){
 
-        sensorManager.registerListener(sensorEventListener,sensor,2000*1000);
     }
-    public void stop(){
-        sensorManager.unregisterListener(sensorEventListener);
+
+    public void convertir(View v) {
+        try {
+            this.conversor = new Conversores();
+            int DE = ((Spinner) findViewById(R.id.spnDe)).getSelectedItemPosition();
+            int A = ((Spinner) findViewById(R.id.spnA)).getSelectedItemPosition();
+
+            double CANTIDAD = Double.parseDouble(((TextView) findViewById(R.id.etCANTIDADA)).getText().toString());
+            TextView tempVal = (TextView) findViewById(R.id.lblRESPUESTA);
+            StringBuilder sb = new StringBuilder();
+            sb.append("La Respuesta: ");
+            sb.append(this.conversor.convertir_area(DE, A, CANTIDAD));
+            tempVal.setText(sb.toString());
+
+        }catch (Exception err){
+            TextView temp = (TextView) findViewById(R.id.lblRESPUESTA);
+            temp.setText("ingrese una cantidad");
+            Toast.makeText(getApplicationContext(),"por favor ingrese una cantidad",Toast.LENGTH_LONG).show();
+        }
     }
-    // Estos dos métodos se agregaron haciendo clic derecho en este punto
-// y buscando en la lista de métodos estos
-    @Override
-    protected void onPause() {
-        stop();
-        super.onPause();
-    }
-    @Override
-    protected void onResume() {
-        start();
-        super.onResume();
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
