@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception err){
             TextView temp = (TextView) findViewById(R.id.lblRESPUESTA);
             temp.setText("ingrese una cantidad");
-            Toast.makeText(getApplicationContext(),"por favor ingrese una cantidad",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"ingrese una cantidad",Toast.LENGTH_LONG).show();
         }
     }
 

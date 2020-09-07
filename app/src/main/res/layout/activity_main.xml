@@ -100,7 +100,6 @@
                         android:layout_marginTop="295dp"
                         android:onClick="convertir"
                         android:text="CONVERTIR"
-                        android:textColor="@android:color/background_light"
                         android:textSize="18dp" />
 
                 </RelativeLayout>
@@ -142,8 +141,7 @@
                         android:layout_height="73dp"
                         android:layout_marginTop="240dp"
                         android:onClick="procesar"
-                        android:text="Convertir"
-                        android:textColor="@android:color/background_light" />
+                        android:text="Convertir" />
 
                 </RelativeLayout>
 
