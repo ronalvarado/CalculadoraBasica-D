@@ -92,14 +92,14 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.mnxModificar:
-                String[] dataAmigo = {
+                String[] dataProducto = {
                         misProductos.getString(0),//idProducto
                         misProductos.getString(1),//nombre_producto
                         misProductos.getString(2),//Marca_producto
                         misProductos.getString(3),//Descripcion_producto
                         misProductos.getString(4) //Precio_Producto
                 };
-                AgregarProducto("modificar",dataAmigo);
+                AgregarProducto("modificar",dataProducto);
                 return true;
 
             case R.id.mnxEliminar:
@@ -143,10 +143,10 @@ public class MainActivity extends AppCompatActivity {
             AgregarProducto("nuevo", new String[]{});
         }
     }
-    void AgregarProducto(String accion, String[] dataAmigo){
+    void AgregarProducto(String accion, String[] dataProducto){
         Bundle enviarParametros = new Bundle();
         enviarParametros.putString("accion",accion);
-        enviarParametros.putStringArray("dataAmigo",dataAmigo);
+        enviarParametros.putStringArray("dataProducto",dataProducto);
         Intent AgregarProductoActivity = new Intent(MainActivity.this, agregar_producto.class);
         AgregarProductoActivity.putExtras(enviarParametros);
         startActivity(AgregarProductoActivity);
