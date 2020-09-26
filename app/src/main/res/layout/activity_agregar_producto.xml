@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".agregar_producto">
+    <EditText
+        android:id="@+id/txtNombre_producto"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        android:hint="Nombre del Producto"/>
+    <EditText
+        android:id="@+id/txtMarca_producto"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="100dp"
+        android:hint="Marca del Producto"/>
+    <EditText
+        android:id="@+id/txtDescripcion_producto"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="170dp"
+        android:hint="Descripcion del Producto"/>
+    <EditText
+        android:id="@+id/txtPrecio_producto"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="245dp"
+        android:hint="Precio"/>
+    <Button
+        android:id="@+id/btnGuardarProducto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="320dp"
+        android:text="Guardar producto"/>
+    <Button
+        android:id="@+id/btnMostrarProducto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="370dp"
+        android:text="Lista de Productos"/>
+
+</RelativeLayout>
+

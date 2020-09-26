@@ -1,80 +1,169 @@
 package diana.orrego.calculadorabasica_d;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
-    // 1.- Variables
-    // hace la comunicación con el hardware
-    SensorManager sensorManager;
-    // para representar al sensor
-    Sensor sensor;
-    // para determinar si algo de acerca al dispositivo
-    SensorEventListener sensorEventListener;
+    DB miBD;
+    Cursor misProductos;
+    ArrayList<String> stringArrayList = new ArrayList<String>();
+    ArrayList<String> copyStringArrayList = new ArrayList<String>();
+    ArrayAdapter<String> stringArrayAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Enlace de la variable TextView con la vista
-        final TextView texto = (TextView)findViewById(R.id.tvSensor);
-        // 2.- Aplicando el servicio
-        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        // El tipo de sensor que se utiliza
-        sensor =
-                sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        // Verificar si el dispositivo tiene este tipo de sensor.
-        // si no lo tiene hayq e terminar la acción
-        if(sensor==null)finish();
-        // llamamos al evento Listener para determinar determinar los cambios
-                sensorEventListener = new SensorEventListener() {
+
+        FloatingActionButton btnAgregarProducto = (FloatingActionButton)findViewById(R.id.btnAgregarProducto);
+        btnAgregarProducto.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                if(sensorEvent.values[0] < sensor.getMaximumRange()){
+            public void onClick(View view) {
+                AgregarProducto("nuevo", new String[]{});
+            }
+        });
+        obtenerDatosProducto();
+        buscarProducto();
+    }
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
 
-                    getWindow().getDecorView().setBackgroundColor(Color.RED);
-                    texto.setText("CAMBIANDO A COLOR ROJO");
-                }else{
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_producto, menu);
 
-                    getWindow().getDecorView().setBackgroundColor(Color.GREEN);
-                    texto.setText("SENSOR DE PROXIMIDAD");
+        AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo)menuInfo;
+        misProductos.moveToPosition(adapterContextMenuInfo.position);
+        menu.setHeaderTitle(misProductos.getString(1));
+    }
+    void buscarProducto(){
+        final TextView tempVal = (TextView)findViewById(R.id.txtBuscarProducto);
+        tempVal.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                stringArrayList.clear();
+                if( tempVal.getText().toString().trim().length()<1 ){//no hay texto para buscar
+                    stringArrayList.addAll(copyStringArrayList);
+                } else{//hacemos la busqueda
+                    for (String producto : copyStringArrayList){
+                        if(producto.toLowerCase().contains(tempVal.getText().toString().trim().toLowerCase())){
+                            stringArrayList.add(producto);
+                        }
+                    }
                 }
+                stringArrayAdapter.notifyDataSetChanged();
             }
             @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-            }
-        }; // Agregamos el punto y coma
-        // 4.-
-        start();
-    }//End: OnCreate.
-    // 3.-
-    public void start(){
+            public void afterTextChanged(Editable editable) {
 
-        sensorManager.registerListener(sensorEventListener,sensor,2000*1000);
+            }
+        });
     }
-    public void stop(){
-        sensorManager.unregisterListener(sensorEventListener);
-    }
-    // Estos dos métodos se agregaron haciendo clic derecho en este punto
-// y buscando en la lista de métodos estos
+
     @Override
-    protected void onPause() {
-        stop();
-        super.onPause();
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.mnxAgregar:
+                AgregarProducto("nuevo", new String[]{});
+                return true;
+
+            case R.id.mnxModificar:
+                String[] dataAmigo = {
+                        misProductos.getString(0),//idProducto
+                        misProductos.getString(1),//nombre_producto
+                        misProductos.getString(2),//Marca_producto
+                        misProductos.getString(3),//Descripcion_producto
+                        misProductos.getString(4) //Precio_Producto
+                };
+                AgregarProducto("modificar",dataAmigo);
+                return true;
+
+            case R.id.mnxEliminar:
+                AlertDialog eliminarProducto =  eliminarProducto();
+                eliminarProducto.show();
+                return true;
+
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
-    @Override
-    protected void onResume() {
-        start();
-        super.onResume();
+    AlertDialog eliminarProducto(){
+        AlertDialog.Builder confirmacion = new AlertDialog.Builder(MainActivity.this);
+        confirmacion.setTitle(misProductos.getString(1));
+        confirmacion.setMessage("Esta seguro de eliminar el registro?");
+        confirmacion.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                miBD.mantenimientoproductos("eliminar",new String[]{misProductos.getString(0)});
+                obtenerDatosProducto();
+                Toast.makeText(getApplicationContext(), "Amigo eliminado con exito.",Toast.LENGTH_SHORT).show();
+                dialogInterface.dismiss();
+            }
+        });
+        confirmacion.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(getApplicationContext(), "Eliminacion cancelada por el usuario.",Toast.LENGTH_SHORT).show();
+                dialogInterface.dismiss();
+            }
+        });
+        return confirmacion.create();
+    }
+    void obtenerDatosProducto(){
+        miBD = new DB(getApplicationContext(), "", null, 1);
+        misProductos = miBD.mantenimientoproductos("consultar", null);
+        if( misProductos.moveToFirst() ){ //hay registro en la BD que mostrar
+            mostrarDatosProducto();
+        } else{ //No tengo registro que mostrar.
+            Toast.makeText(getApplicationContext(), "No hay registros de productos que mostrar",Toast.LENGTH_LONG).show();
+            AgregarProducto("nuevo", new String[]{});
+        }
+    }
+    void AgregarProducto(String accion, String[] dataAmigo){
+        Bundle enviarParametros = new Bundle();
+        enviarParametros.putString("accion",accion);
+        enviarParametros.putStringArray("dataAmigo",dataAmigo);
+        Intent AgregarProductoActivity = new Intent(MainActivity.this, agregar_producto.class);
+        AgregarProductoActivity.putExtras(enviarParametros);
+        startActivity(AgregarProductoActivity);
+    }
+    void mostrarDatosProducto(){
+        stringArrayList.clear();
+        ListView ltsProducto = (ListView)findViewById(R.id.ltsProducto);
+        stringArrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, stringArrayList);
+        ltsProducto.setAdapter(stringArrayAdapter);
+        do {
+            stringArrayList.add(misProductos.getString(1));
+        }while(misProductos.moveToNext());
+
+        copyStringArrayList.clear();//limpiamos la lista de producto
+        copyStringArrayList.addAll(stringArrayList);//creamos la copia de la lista de producto...
+
+        stringArrayAdapter.notifyDataSetChanged();
+        registerForContextMenu(ltsProducto);
     }
 }
