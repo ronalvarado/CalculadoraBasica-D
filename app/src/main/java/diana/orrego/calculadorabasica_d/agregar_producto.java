@@ -41,7 +41,7 @@ public class agregar_producto extends AppCompatActivity {
         btnProductos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarListaProductos();
+                mostrarListaProducto();
             }
         });
         guardarDatosProducto();
@@ -61,7 +61,7 @@ public class agregar_producto extends AppCompatActivity {
                     }catch (Exception ex){}
                     if (photoFile != null) {
                         try {
-                            Uri photoURI = FileProvider.getUriForFile(agregar_producto.this, "com.example.prueba.fileprovider", photoFile);
+                            Uri photoURI = FileProvider.getUriForFile(agregar_producto.this, "com.example.diana.orrego.calculadorabasica_d", photoFile);
                             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                             startActivityForResult(takePictureIntent, 1);
                         }catch (Exception ex){
@@ -101,41 +101,47 @@ public class agregar_producto extends AppCompatActivity {
         urlCompletaImg = image.getAbsolutePath();
         return image;
 
-
-
-
-
     }
     void guardarDatosProducto(){
-        btnProductos = findViewById(R.id.btnGuardarProducto);
-        btnProductos.setOnClickListener(new View.OnClickListener() {
+        setContentView(R.layout.activity_agregar_producto);
+        Button btnGuardarProducto= (Button)findViewById(R.id.btnGuardarProducto);
+        btnGuardarProducto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TextView tempVal = findViewById(R.id.txtNombre_producto);
+
+                TextView tempVal = (TextView)findViewById(R.id.txtNombre_producto);
                 String nombre = tempVal.getText().toString();
 
-                tempVal = findViewById(R.id.txtMarca_producto);
+                tempVal = (TextView)findViewById(R.id.txtMarca_producto);
                 String marca = tempVal.getText().toString();
 
-                tempVal = findViewById(R.id.txtDescripcion_producto);
+                tempVal = (TextView)findViewById(R.id.txtDescripcion_producto);
                 String descripcion = tempVal.getText().toString();
 
-                tempVal = findViewById(R.id.txtPrecio_producto);
+                tempVal = (TextView)findViewById(R.id.txtPrecio_producto);
                 String precio = tempVal.getText().toString();
 
-                String[] data = {idProducto,nombre,marca,descripcion,precio,urlCompletaImg};
+                String[] data = {idProducto,nombre,marca,descripcion,precio};
 
                 miDB = new DB(getApplicationContext(),"", null, 1);
                 miDB.mantenimientoproductos(accion, data);
 
-                Toast.makeText(getApplicationContext(),"Registro del producto se insertado con exito", Toast.LENGTH_LONG).show();
-                mostrarListaProductos();
+                Toast.makeText(getApplicationContext(),"Registro de producto se ha realizado correctamente!", Toast.LENGTH_LONG).show();
+                mostrarListaProducto();
             }
         });
+        btnGuardarProducto = (Button)findViewById(R.id.btnMostrarProducto);
+        btnGuardarProducto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarListaProducto();
+            }
+        });
+        mostrarDatosProducto();
     }
-    void mostrarListaProductos(){
-        Intent mostrarProductos = new Intent(agregar_producto.this, MainActivity.class);
-        startActivity(mostrarProductos);
+    void mostrarListaProducto(){
+        Intent MostrarProducto = new Intent(agregar_producto.this, MainActivity.class);
+        startActivity(MostrarProducto);
     }
     void mostrarDatosProducto(){
         try {
@@ -157,10 +163,6 @@ public class agregar_producto extends AppCompatActivity {
 
                 tempVal = (TextView)findViewById(R.id.txtPrecio_producto);
                 tempVal.setText(dataProducto[4]);
-
-                urlCompletaImg = dataProducto[5];
-                Bitmap imageBitmap = BitmapFactory.decodeFile(urlCompletaImg);
-                imgFotoProducto.setImageBitmap(imageBitmap);
             }
         }catch (Exception ex){
             ///

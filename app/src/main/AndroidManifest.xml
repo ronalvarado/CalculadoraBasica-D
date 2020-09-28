@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <provider
-            android:authorities="com.example.prueba.fileprovider"
+            android:authorities="com.example.diana.orrego.calculadorabasica_d.fileprovider"
             android:name="androidx.core.content.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
