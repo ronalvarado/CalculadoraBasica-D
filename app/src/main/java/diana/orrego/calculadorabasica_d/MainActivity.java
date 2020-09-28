@@ -26,9 +26,10 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     DB miBD;
     Cursor misProductos;
-    ArrayList<String> stringArrayList = new ArrayList<String>();
-    ArrayList<String> copyStringArrayList = new ArrayList<String>();
-    ArrayAdapter<String> stringArrayAdapter;
+    Productos Producto;
+    ArrayList<Productos> stringArrayList = new ArrayList<Productos>();
+    ArrayList<Productos> copyStringArrayList = new ArrayList<Productos>();
+    ListView ltsProducto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         btnAgregarProducto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AgregarProducto("nuevo", new String[]{});
+                agregar_productos("nuevo", new String[]{});
             }
         });
         obtenerDatosProducto();
@@ -65,17 +66,23 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                stringArrayList.clear();
-                if( tempVal.getText().toString().trim().length()<1 ){//no hay texto para buscar
-                    stringArrayList.addAll(copyStringArrayList);
-                } else{//hacemos la busqueda
-                    for (String producto : copyStringArrayList){
-                        if(producto.toLowerCase().contains(tempVal.getText().toString().trim().toLowerCase())){
-                            stringArrayList.add(producto);
+                try {
+                    stringArrayList.clear();
+                    if (tempVal.getText().toString().trim().length() < 1) {//no hay texto para buscar
+                        stringArrayList.addAll(copyStringArrayList);
+                    } else {//hacemos la busqueda
+                        for (Productos am : copyStringArrayList) {
+                            String nombre = am.getNombre();
+                            if (nombre.toLowerCase().contains(tempVal.getText().toString().trim().toLowerCase())) {
+                                stringArrayList.add(am);
+                            }
                         }
                     }
+                    adaptadorImagenes adaptadorImg = new adaptadorImagenes(getApplicationContext(), stringArrayList);
+                    ltsProducto.setAdapter(adaptadorImg);
+                }catch (Exception ex){
+                    Toast.makeText(getApplicationContext(), "Error: "+ ex.getMessage(), Toast.LENGTH_LONG).show();
                 }
-                stringArrayAdapter.notifyDataSetChanged();
             }
             @Override
             public void afterTextChanged(Editable editable) {
@@ -88,23 +95,24 @@ public class MainActivity extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.mnxAgregar:
-                AgregarProducto("nuevo", new String[]{});
+                agregar_productos("nuevo", new String[]{});
                 return true;
 
             case R.id.mnxModificar:
                 String[] dataProducto = {
                         misProductos.getString(0),//idProducto
-                        misProductos.getString(1),//nombre_producto
-                        misProductos.getString(2),//Marca_producto
-                        misProductos.getString(3),//Descripcion_producto
-                        misProductos.getString(4) //Precio_Producto
+                        misProductos.getString(1),//nombre
+                        misProductos.getString(2),//marca
+                        misProductos.getString(3),//descripcion
+                        misProductos.getString(4), //precio
+                        misProductos.getString(5)  //urlImg
                 };
-                AgregarProducto("modificar",dataProducto);
+                agregar_productos("modificar",dataProducto);
                 return true;
 
             case R.id.mnxEliminar:
-                AlertDialog eliminarProducto =  eliminarProducto();
-                eliminarProducto.show();
+                AlertDialog eliminarFriend =  eliminarProducto();
+                eliminarFriend.show();
                 return true;
 
             default:
@@ -114,13 +122,13 @@ public class MainActivity extends AppCompatActivity {
     AlertDialog eliminarProducto(){
         AlertDialog.Builder confirmacion = new AlertDialog.Builder(MainActivity.this);
         confirmacion.setTitle(misProductos.getString(1));
-        confirmacion.setMessage("Esta seguro de eliminar el registro?");
+        confirmacion.setMessage("Esta seguro de eliminar el registro del producto?");
         confirmacion.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 miBD.mantenimientoproductos("eliminar",new String[]{misProductos.getString(0)});
                 obtenerDatosProducto();
-                Toast.makeText(getApplicationContext(), "Amigo eliminado con exito.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "producto eliminado con exito.",Toast.LENGTH_SHORT).show();
                 dialogInterface.dismiss();
             }
         });
@@ -140,30 +148,70 @@ public class MainActivity extends AppCompatActivity {
             mostrarDatosProducto();
         } else{ //No tengo registro que mostrar.
             Toast.makeText(getApplicationContext(), "No hay registros de productos que mostrar",Toast.LENGTH_LONG).show();
-            AgregarProducto("nuevo", new String[]{});
+            agregar_productos("nuevo", new String[]{});
         }
     }
-    void AgregarProducto(String accion, String[] dataProducto){
+    void agregar_productos(String accion, String[] dataProducto){
         Bundle enviarParametros = new Bundle();
         enviarParametros.putString("accion",accion);
         enviarParametros.putStringArray("dataProducto",dataProducto);
-        Intent AgregarProductoActivity = new Intent(MainActivity.this, agregar_producto.class);
-        AgregarProductoActivity.putExtras(enviarParametros);
-        startActivity(AgregarProductoActivity);
+        Intent  agregar_producto = new Intent(MainActivity.this, agregar_producto.class);
+        agregar_producto.putExtras(enviarParametros);
+        startActivity( agregar_producto);
     }
     void mostrarDatosProducto(){
         stringArrayList.clear();
-        ListView ltsProducto = (ListView)findViewById(R.id.ltsProducto);
-        stringArrayAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, stringArrayList);
-        ltsProducto.setAdapter(stringArrayAdapter);
+        ltsProducto = (ListView)findViewById(R.id.ltsProducto);
         do {
-            stringArrayList.add(misProductos.getString(1));
+            Producto = new Productos(misProductos.getString(0),misProductos.getString(1), misProductos.getString(2), misProductos.getString(3), misProductos.getString(4), misProductos.getString(5));
+            stringArrayList.add(Producto);
         }while(misProductos.moveToNext());
+        adaptadorImagenes adaptadorImg = new adaptadorImagenes(getApplicationContext(), stringArrayList);
+        ltsProducto.setAdapter(adaptadorImg);
 
-        copyStringArrayList.clear();//limpiamos la lista de producto
-        copyStringArrayList.addAll(stringArrayList);//creamos la copia de la lista de producto...
-
-        stringArrayAdapter.notifyDataSetChanged();
+        copyStringArrayList.clear();//limpiamos la lista de amigos
+        copyStringArrayList.addAll(stringArrayList);//creamos la copia de la lista de amigos...
         registerForContextMenu(ltsProducto);
     }
+}
+class Productos{
+    String id;
+    String nombre;
+    String marca;
+    String descripcion;
+    String precio;
+    String urlImg;
+
+    public Productos(String id, String nombre, String marca, String descripcion, String precio, String urlImg) {
+        this.id = id;
+        this.nombre = nombre;
+        this.marca = marca;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.urlImg = urlImg;
+    }
+
+    public String getId() { return id;}
+
+    public void setId(String id) { this.id = id;}
+
+    public String getNombre() { return nombre; }
+
+    public void setNombre(String nombre) { this.nombre = nombre;}
+
+    public String getMarca() { return marca;}
+
+    public void setMarca(String marca) { this.marca= marca; }
+
+    public String getDescripcion() { return descripcion; }
+
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion;}
+
+    public String getPrecio() { return precio; }
+
+    public void setPrecio(String precio) { this.precio = precio; }
+
+    public String getUrlImg() { return urlImg; }
+
+    public void setUrlImg(String urlImg) { this.urlImg = urlImg; }
 }
