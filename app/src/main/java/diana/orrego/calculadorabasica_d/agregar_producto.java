@@ -16,19 +16,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class agregar_producto extends AppCompatActivity {
     DB miDB;
     String accion = "nuevo";
     String idProducto = "0";
-    ImageView imgFotoProducto;
-    String urlCompletaImg;
-    Button btnProductos;
-    Intent takePictureIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

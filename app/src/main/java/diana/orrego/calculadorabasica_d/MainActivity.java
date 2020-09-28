@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 miBD.mantenimientoproductos("eliminar",new String[]{misProductos.getString(0)});
                 obtenerDatosProducto();
-                Toast.makeText(getApplicationContext(), "producto eliminado con exito.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Amigo eliminado con exito.",Toast.LENGTH_SHORT).show();
                 dialogInterface.dismiss();
             }
         });
@@ -168,3 +168,4 @@ public class MainActivity extends AppCompatActivity {
         registerForContextMenu(ltsProducto);
     }
 }
+//prueva
