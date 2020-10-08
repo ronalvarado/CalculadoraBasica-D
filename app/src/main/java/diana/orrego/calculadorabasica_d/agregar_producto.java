@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -16,78 +17,105 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 
 public class agregar_producto extends AppCompatActivity {
-    DB miDB;
-    String accion = "nuevo";
-    String idProducto = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_producto);
-        Button btnGuardarProducto= (Button)findViewById(R.id.btnGuardarProducto);
-        btnGuardarProducto.setOnClickListener(new View.OnClickListener() {
+
+        FloatingActionButton btnMostrarProducto = findViewById(R.id.btnMostrarProducto);
+        btnMostrarProducto.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-
-                TextView tempVal = (TextView)findViewById(R.id.txtNombre_producto);
-                String nombre = tempVal.getText().toString();
-
-                tempVal = (TextView)findViewById(R.id.txtMarca_producto);
-                String marca = tempVal.getText().toString();
-
-                tempVal = (TextView)findViewById(R.id.txtDescripcion_producto);
-                String descripcion = tempVal.getText().toString();
-
-                tempVal = (TextView)findViewById(R.id.txtPrecio_producto);
-                String precio = tempVal.getText().toString();
-
-                String[] data = {idProducto,nombre,marca,descripcion,precio};
-
-                miDB = new DB(getApplicationContext(),"", null, 1);
-                miDB.mantenimientoproductos(accion, data);
-
-                Toast.makeText(getApplicationContext(),"Registro de producto se ha realizado correctamente!", Toast.LENGTH_LONG).show();
-                mostrarListaProducto();
+            public void onClick(View v) {
+                mostrarProducto();
             }
         });
-        btnGuardarProducto = (Button)findViewById(R.id.btnMostrarProducto);
+        FloatingActionButton btnGuardarProducto = findViewById(R.id.btnGuardarProducto);
         btnGuardarProducto.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                mostrarListaProducto();
+            public void onClick(View v) {
+                guardarProducto();
             }
         });
-        mostrarDatosProducto();
     }
-    void mostrarListaProducto(){
-        Intent MostrarProducto = new Intent(agregar_producto.this, MainActivity.class);
-        startActivity(MostrarProducto);
+    private void mostrarProducto(){
+        Intent mostrarProducto = new Intent(agregar_producto.this, MainActivity.class);
+        startActivity(mostrarProducto);
     }
-    void mostrarDatosProducto(){
+    private void guardarProducto(){
+        TextView tempVal = findViewById(R.id.txtCodigoProducto);
+        String codigo = tempVal.getText().toString();
+
+        tempVal = findViewById(R.id.txtNombreProducto);
+        String nombre = tempVal.getText().toString();
+
+        tempVal = findViewById(R.id.txtMarcaProducto);
+        String marca = tempVal.getText().toString();
+
+        tempVal = findViewById(R.id.txtDescripcionProducto);
+        String descripcion = tempVal.getText().toString();
+
+        tempVal = findViewById(R.id.txtDuiPersona);
+        String dui = tempVal.getText().toString();
+
         try {
-            Bundle recibirParametros = getIntent().getExtras();
-            accion = recibirParametros.getString("accion");
-            if (accion.equals("modificar")){
-                String[] dataProducto = recibirParametros.getStringArray("dataProducto");
+            JSONObject datosProducto = new JSONObject();
+            datosProducto.put("codigo", codigo);
+            datosProducto.put("nombre", nombre);
+            datosProducto.put("marca", marca);
+            datosProducto.put("descripcion", descripcion);
+            datosProducto.put("dui", dui);
 
-                idProducto = dataProducto[0];
-
-                TextView tempVal = (TextView)findViewById(R.id.txtNombre_producto);
-                tempVal.setText(dataProducto[1]);
-
-                tempVal = (TextView)findViewById(R.id.txtMarca_producto);
-                tempVal.setText(dataProducto[2]);
-
-                tempVal = (TextView)findViewById(R.id.txtDescripcion_producto);
-                tempVal.setText(dataProducto[3]);
-
-                tempVal = (TextView)findViewById(R.id.txtPrecio_producto);
-                tempVal.setText(dataProducto[4]);
-            }
         }catch (Exception ex){
-            ///
+            Toast.makeText(getApplicationContext(), "Error: "+ ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+    private class enviarDatosProducto extends AsyncTask<String,String, String> {
+        HttpURLConnection urlConnection;
+        @Override
+        protected String doInBackground(String... parametros) {
+            StringBuilder stringBuilder = new StringBuilder();
+            String jsonResponse = null;
+            String jsonDatos = parametros[0];
+            BufferedReader reader;
+            try {
+                URL url = new URL("http://192.168.1.15:5984/db_agenda/");
+                urlConnection = (HttpURLConnection)url.openConnection();
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type","application/json");
+                urlConnection.setRequestProperty("Accept","application/json");
+
+                Writer writer = new BufferedWriter(new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8"));
+                writer.write(jsonDatos);
+                writer.close();
+
+                InputStream inputStream = urlConnection.getInputStream();
+            }catch (Exception ex){
+                //
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
         }
     }
 }

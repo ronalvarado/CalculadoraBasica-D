@@ -5,19 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="@drawable/fondo"
+    android:background="@drawable/fondo1"
     >
 
     <EditText
-        android:id="@+id/txtBuscarProducto"
+        android:id="@+id/txtBuscar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Buscar"/>
+        android:layout_height="60dp"/>
     <ListView
-        android:id="@+id/ltsProducto"
+        android:id="@+id/ltsTiendaCouchDB"
         android:layout_marginTop="60dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAgregarProducto"
