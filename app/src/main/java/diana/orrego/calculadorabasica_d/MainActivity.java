@@ -38,24 +38,93 @@ import java.util.ArrayList;
 public class MainActivity extends Activity {
     JSONArray datosJSON;
     JSONObject jsonObject;
-
+    Integer posicion;
+    ArrayList<String> arrayList =new ArrayList<String>();
+    ArrayList<String> copyStringArrayList = new ArrayList<String>();
+    ArrayAdapter<String> stringArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        obtenerDatosProducto objObtenerProducto = new obtenerDatosProducto();
-        objObtenerProducto.execute();
+        obtenerDatosProducto objObtenerProductos = new obtenerDatosProducto();
+        objObtenerProductos.execute();
 
         FloatingActionButton btnAgregarNuevoProducto = findViewById(R.id.btnAgregarProducto);
         btnAgregarNuevoProducto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                agregarNuevosProductos();
+                agregarNuevosProductos("nuevo", jsonObject);
+            }
+        });
+        buscarProducto();
+    }
+    void buscarProducto(){
+        final TextView tempVal = (TextView)findViewById(R.id.txtBuscarProducto);
+        tempVal.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                arrayList.clear();
+                if( tempVal.getText().toString().trim().length()<1 ){//no hay texto para buscar
+                    arrayList.addAll(copyStringArrayList);
+                } else{//hacemos la busqueda
+                    for (String amigo : copyStringArrayList){
+                        if(amigo.toLowerCase().contains(tempVal.getText().toString().trim().toLowerCase())){
+                            arrayList.add(amigo);
+                        }
+                    }
+                }
+                stringArrayAdapter.notifyDataSetChanged();
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
     }
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_producto, menu);
+        try {
+            AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+            posicion = adapterContextMenuInfo.position;
+            menu.setHeaderTitle(datosJSON.getJSONObject(posicion).getString("nombre"));
+        }catch (Exception ex){
+
+        }
+    }
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.mnxAgregarProducto:
+                agregarNuevosProductos("nuevo", jsonObject);
+                return true;
+
+            case R.id.mnxModificarProducto:
+                try {
+                    agregarNuevosProductos("modificar", datosJSON.getJSONObject(posicion));
+                }catch (Exception ex){}
+                return true;
+
+            case R.id.mnxEliminarProducto:
+
+                AlertDialog eliminarProducto =  eliminarProducto();
+                eliminarProducto.show();
+                return true;
+
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
     private class obtenerDatosProducto extends AsyncTask<Void,Void, String> {
         HttpURLConnection urlConnection;
 
@@ -63,7 +132,7 @@ public class MainActivity extends Activity {
         protected String doInBackground(Void... voids) {
             StringBuilder result = new StringBuilder();
             try {
-                URL url = new URL("Http://192.168.1.15:5984/db_agenda/_design/agenda/_view/mi-agenda");
+                URL url = new URL("Http://192.168.1.7:5984/db_agenda/_design/agenda/_view/mi-agenda");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
 
@@ -92,23 +161,114 @@ public class MainActivity extends Activity {
         }
     }
     private void mostrarDatosProducto(){
-        ListView ltsProductos = findViewById(R.id.ltsTiendaCouchDB);
+        ListView ltsProducto = findViewById(R.id.ltsTiendaCouchDB);
         try {
-            final ArrayList<String> arrayList = new ArrayList<>();
-            final ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayList);
-            ltsProductos.setAdapter(stringArrayAdapter);
+            arrayList.clear();
+            stringArrayAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayList);
+            ltsProducto.setAdapter(stringArrayAdapter);
 
             for (int i = 0; i < datosJSON.length(); i++) {
                 stringArrayAdapter.add(datosJSON.getJSONObject(i).getJSONObject("value").getString("nombre"));
             }
+            copyStringArrayList.clear();
+            copyStringArrayList.addAll(arrayList);
+
             stringArrayAdapter.notifyDataSetChanged();
-            registerForContextMenu(ltsProductos);
+            registerForContextMenu(ltsProducto);
         }catch (Exception ex){
             Toast.makeText(MainActivity.this, "Error al mostrar los datos: " + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
-    private void agregarNuevosProductos(){
-        Intent nuevoProdutos = new Intent(MainActivity.this, agregar_producto.class);
-        startActivity(nuevoProdutos);
+    public void agregarNuevosProductos(String accion, JSONObject jsonObject){
+        try {
+            Bundle enviarParametros = new Bundle();
+            enviarParametros.putString("accion",accion);
+            enviarParametros.putString("dataProducto",jsonObject.toString());
+
+            Intent agregarProducto = new Intent(MainActivity.this, agregar_producto.class);
+            agregarProducto.putExtras(enviarParametros);
+            startActivity(agregarProducto);
+        }catch (Exception e){
+            Toast.makeText(getApplicationContext(), "Error al llamar agregar producto: "+ e.toString(), Toast.LENGTH_LONG).show();
+        }
+    }
+    AlertDialog eliminarProducto(){
+        AlertDialog.Builder confirmacion = new AlertDialog.Builder(MainActivity.this);
+        try {
+            confirmacion.setTitle(datosJSON.getJSONObject(posicion).getJSONObject("value").getString("nombre"));
+            confirmacion.setMessage("Esta seguro de eliminar el registro?");
+            confirmacion.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    eliminarDatosProducto objEliminarProducto = new eliminarDatosProducto();
+                    objEliminarProducto.execute();
+
+                    Toast.makeText(getApplicationContext(), "producto eliminado con exito.", Toast.LENGTH_SHORT).show();
+                    dialogInterface.dismiss();
+                }
+            });
+            confirmacion.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Toast.makeText(getApplicationContext(), "Eliminacion cancelada por el usuario.", Toast.LENGTH_SHORT).show();
+                    dialogInterface.dismiss();
+                }
+            });
+        }catch (Exception ex){
+            Toast.makeText(getApplicationContext(), "Error al mostrar la confirmacion: "+ ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
+        return confirmacion.create();
+    }
+    private class eliminarDatosProducto extends AsyncTask<String,String, String> {
+        HttpURLConnection urlConnection;
+
+        @Override
+        protected String doInBackground(String... parametros) {
+            StringBuilder stringBuilder = new StringBuilder();
+            String jsonResponse = null;
+            try {
+                URL url = new URL("http://192.168.1.7:5984/db_agenda/" +
+                        datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_id") + "?rev=" +
+                        datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_rev"));
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("DELETE");
+
+                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+                String inputLine;
+                StringBuffer stringBuffer = new StringBuffer();
+                while ((inputLine = reader.readLine()) != null) {
+                    stringBuffer.append(inputLine + "\n");
+                }
+                if (stringBuffer.length() == 0) {
+                    return null;
+                }
+                jsonResponse = stringBuffer.toString();
+                return jsonResponse;
+            } catch (Exception ex) {
+                //
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            try {
+                JSONObject jsonObject = new JSONObject(s);
+                if (jsonObject.getBoolean("ok")) {
+                    Toast.makeText(getApplicationContext(), "Datos de producto guardado con exito", Toast.LENGTH_SHORT).show();
+                    obtenerDatosProducto objObtenerProducto = new obtenerDatosProducto();
+                    objObtenerProducto.execute();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Error al intentar guardar datos de producto", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), "Error al guardar producto: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
