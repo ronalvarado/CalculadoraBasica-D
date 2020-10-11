@@ -85,13 +85,13 @@ public class MainActivity extends Activity {
             try {
                 jsonObject = new JSONObject(s);
                 datosJSON = jsonObject.getJSONArray("rows");
-                mostrarDatosPersona();
+                mostrarDatosProducto();
             } catch (Exception ex) {
                 Toast.makeText(MainActivity.this, "Error la parsear los datos: " + ex.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
     }
-    private void mostrarDatosPersona(){
+    private void mostrarDatosProducto(){
         ListView ltsProductos = findViewById(R.id.ltsTiendaCouchDB);
         try {
             final ArrayList<String> arrayList = new ArrayList<>();
