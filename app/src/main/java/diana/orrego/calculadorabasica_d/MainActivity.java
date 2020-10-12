@@ -132,7 +132,7 @@ public class MainActivity extends Activity {
         protected String doInBackground(Void... voids) {
             StringBuilder result = new StringBuilder();
             try {
-                URL url = new URL("Http://192.168.1.7:5984/db_agenda/_design/agenda/_view/mi-agenda");
+                URL url = new URL("Http://192.168.1.7:5984/db_tiendaonly/_design/Tiendaxd/_view/Tienda-couchdb");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
 
@@ -228,7 +228,7 @@ public class MainActivity extends Activity {
             StringBuilder stringBuilder = new StringBuilder();
             String jsonResponse = null;
             try {
-                URL url = new URL("http://192.168.1.7:5984/db_agenda/" +
+                URL url = new URL("http://192.168.1.7:5984/db_tiendaonly/_design/Tiendaxd/_view/Tienda-couchdb" +
                         datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_id") + "?rev=" +
                         datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_rev"));
 
