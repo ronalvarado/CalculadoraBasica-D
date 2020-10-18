@@ -1,10 +1,10 @@
 package diana.orrego.calculadorabasica_d;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,15 +18,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -34,10 +28,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity  {
     JSONArray datosJSON;
-    JSONObject jsonObject;
+    JSONObject JsonObject;
     Integer posicion;
     ArrayList<String> arrayList =new ArrayList<String>();
     ArrayList<String> copyStringArrayList = new ArrayList<String>();
@@ -48,19 +41,19 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        obtenerDatosProducto objObtenerProductos = new obtenerDatosProducto();
-        objObtenerProductos.execute();
+        obtenerDatostienda objObtenerproductos =new obtenerDatostienda();
+        objObtenerproductos.execute();
 
-        FloatingActionButton btnAgregarNuevoProducto = findViewById(R.id.btnAgregarProducto);
-        btnAgregarNuevoProducto.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton btnAgregarNuevoProductos = findViewById(R.id.btnAgregarProducto);
+        btnAgregarNuevoProductos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                agregarNuevosProductos("nuevo", jsonObject);
+                agregarNuevosProductos("nuevo", JsonObject);
             }
         });
-        buscarProducto();
+        buscarProductos();
     }
-    void buscarProducto(){
+    void buscarProductos(){
         final TextView tempVal = (TextView)findViewById(R.id.txtBuscarProducto);
         tempVal.addTextChangedListener(new TextWatcher() {
             @Override
@@ -73,9 +66,9 @@ public class MainActivity extends Activity {
                 if( tempVal.getText().toString().trim().length()<1 ){//no hay texto para buscar
                     arrayList.addAll(copyStringArrayList);
                 } else{//hacemos la busqueda
-                    for (String amigo : copyStringArrayList){
-                        if(amigo.toLowerCase().contains(tempVal.getText().toString().trim().toLowerCase())){
-                            arrayList.add(amigo);
+                    for (String Producto : copyStringArrayList){
+                        if(Producto.toLowerCase().contains(tempVal.getText().toString().trim().toLowerCase())){
+                            arrayList.add(Producto);
                         }
                     }
                 }
@@ -96,7 +89,7 @@ public class MainActivity extends Activity {
         try {
             AdapterView.AdapterContextMenuInfo adapterContextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
             posicion = adapterContextMenuInfo.position;
-            menu.setHeaderTitle(datosJSON.getJSONObject(posicion).getString("nombre"));
+            menu.setHeaderTitle(datosJSON.getJSONObject(posicion).getString("Nombre"));
         }catch (Exception ex){
 
         }
@@ -105,7 +98,7 @@ public class MainActivity extends Activity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.mnxAgregarProducto:
-                agregarNuevosProductos("nuevo", jsonObject);
+                agregarNuevosProductos("nuevo", JsonObject);
                 return true;
 
             case R.id.mnxModificarProducto:
@@ -116,29 +109,27 @@ public class MainActivity extends Activity {
 
             case R.id.mnxEliminarProducto:
 
-                AlertDialog eliminarProducto =  eliminarProducto();
-                eliminarProducto.show();
+                AlertDialog eliminarFriend =  eliminarProducto();
+                eliminarFriend.show();
                 return true;
 
             default:
                 return super.onContextItemSelected(item);
         }
     }
-
-    private class obtenerDatosProducto extends AsyncTask<Void,Void, String> {
-        HttpURLConnection urlConnection;
-
+    private class obtenerDatostienda extends AsyncTask<Void,Void, String>{
+        HttpURLConnection urLconection;
         @Override
         protected String doInBackground(Void... voids) {
             StringBuilder result = new StringBuilder();
             try {
-                URL url = new URL("Http://192.168.1.7:5984/db_tiendaonly/_design/Tiendaxd/_view/Tienda-couchdb");
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
+                URL url = new URL("http://localhost:5984/db_tiendaonly/_design/Tiendaxd/_view/Tienda-couchdb");
+                urLconection = (HttpURLConnection) url.openConnection();//se conecta al servidor
+                urLconection.setRequestMethod("GET");
 
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                InputStream in = new BufferedInputStream(urLconection.getInputStream());//obtener datos
                 BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                String linea;
+                String linea; //lear los datos
                 while ((linea = reader.readLine()) != null) {
                     result.append(linea);
                 }
@@ -149,32 +140,33 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(String s) {//recibr los datos
             super.onPostExecute(s);
             try {
-                jsonObject = new JSONObject(s);
-                datosJSON = jsonObject.getJSONArray("rows");
-                mostrarDatosProducto();
+                JsonObject = new JSONObject(s);
+                datosJSON = JsonObject.getJSONArray("rows");
+                mostrarDatosProductos();
             } catch (Exception ex) {
                 Toast.makeText(MainActivity.this, "Error la parsear los datos: " + ex.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
     }
-    private void mostrarDatosProducto(){
-        ListView ltsProducto = findViewById(R.id.ltsTiendaCouchDB);
+    private void mostrarDatosProductos(){
+
+        ListView ltsProductos = findViewById(R.id.ltsTiendaCouchDB);
         try {
             arrayList.clear();
             stringArrayAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, arrayList);
-            ltsProducto.setAdapter(stringArrayAdapter);
+            ltsProductos.setAdapter(stringArrayAdapter);
 
             for (int i = 0; i < datosJSON.length(); i++) {
-                stringArrayAdapter.add(datosJSON.getJSONObject(i).getJSONObject("value").getString("nombre"));
+                stringArrayAdapter.add(datosJSON.getJSONObject(i).getJSONObject("value").getString("Nombre"));
             }
             copyStringArrayList.clear();
             copyStringArrayList.addAll(arrayList);
 
             stringArrayAdapter.notifyDataSetChanged();
-            registerForContextMenu(ltsProducto);
+            registerForContextMenu(ltsProductos);
         }catch (Exception ex){
             Toast.makeText(MainActivity.this, "Error al mostrar los datos: " + ex.getMessage(), Toast.LENGTH_LONG).show();
         }
@@ -195,7 +187,7 @@ public class MainActivity extends Activity {
     AlertDialog eliminarProducto(){
         AlertDialog.Builder confirmacion = new AlertDialog.Builder(MainActivity.this);
         try {
-            confirmacion.setTitle(datosJSON.getJSONObject(posicion).getJSONObject("value").getString("nombre"));
+            confirmacion.setTitle(datosJSON.getJSONObject(posicion).getJSONObject("value").getString("Nombre"));
             confirmacion.setMessage("Esta seguro de eliminar el registro?");
             confirmacion.setPositiveButton("Si", new DialogInterface.OnClickListener() {
                 @Override
@@ -204,7 +196,7 @@ public class MainActivity extends Activity {
                     eliminarDatosProducto objEliminarProducto = new eliminarDatosProducto();
                     objEliminarProducto.execute();
 
-                    Toast.makeText(getApplicationContext(), "producto eliminado con exito.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Producto eliminado con exito.", Toast.LENGTH_SHORT).show();
                     dialogInterface.dismiss();
                 }
             });
@@ -216,7 +208,7 @@ public class MainActivity extends Activity {
                 }
             });
         }catch (Exception ex){
-            Toast.makeText(getApplicationContext(), "Error al mostrar la confirmacion: "+ ex.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Error al mostrar la confoirmacion: "+ ex.getMessage(), Toast.LENGTH_LONG).show();
         }
         return confirmacion.create();
     }
@@ -228,7 +220,7 @@ public class MainActivity extends Activity {
             StringBuilder stringBuilder = new StringBuilder();
             String jsonResponse = null;
             try {
-                URL url = new URL("http://192.168.1.7:5984/db_tiendaonly/_design/Tiendaxd/_view/Tienda-couchdb" +
+                URL url = new URL("http://localhost:5984/db_tiendaonly/" +
                         datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_id") + "?rev=" +
                         datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_rev"));
 
@@ -261,8 +253,8 @@ public class MainActivity extends Activity {
                 JSONObject jsonObject = new JSONObject(s);
                 if (jsonObject.getBoolean("ok")) {
                     Toast.makeText(getApplicationContext(), "Datos de producto guardado con exito", Toast.LENGTH_SHORT).show();
-                    obtenerDatosProducto objObtenerProducto = new obtenerDatosProducto();
-                    objObtenerProducto.execute();
+                    obtenerDatostienda objObtenerProductos = new obtenerDatostienda();
+                    objObtenerProductos.execute();
                 } else {
                     Toast.makeText(getApplicationContext(), "Error al intentar guardar datos de producto", Toast.LENGTH_SHORT).show();
                 }
@@ -271,4 +263,5 @@ public class MainActivity extends Activity {
             }
         }
     }
+
 }

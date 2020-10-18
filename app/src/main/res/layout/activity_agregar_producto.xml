@@ -7,12 +7,7 @@
     tools:context=".agregar_producto"
     android:background="@drawable/fondo1"
     >
-    <EditText
-        android:id="@+id/txtCodigoProducto"
-        android:layout_marginTop="60dp"
-        android:layout_width="match_parent"
-        android:hint="CODIGO"
-        android:layout_height="wrap_content"/>
+
     <EditText
         android:id="@+id/txtNombreProducto"
         android:layout_marginTop="120dp"
