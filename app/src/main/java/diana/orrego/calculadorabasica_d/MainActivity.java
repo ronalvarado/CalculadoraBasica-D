@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity  {
         protected String doInBackground(Void... voids) {
             StringBuilder result = new StringBuilder();
             try {
-                URL url = new URL("http://localhost:5984/db_tiendaonly/_design/Tiendaxd/_view/Tienda-couchdb");
+                URL url = new URL("http://10.0.2.2:5984/db_tiendaonly/_design/Tiendaxd/_view/Tienda-couchdb");
                 urLconection = (HttpURLConnection) url.openConnection();//se conecta al servidor
                 urLconection.setRequestMethod("GET");
 
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity  {
             StringBuilder stringBuilder = new StringBuilder();
             String jsonResponse = null;
             try {
-                URL url = new URL("http://localhost:5984/db_tiendaonly/" +
+                URL url = new URL("http://10.0.2.2:5984/db_tiendaonly/" +
                         datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_id") + "?rev=" +
                         datosJSON.getJSONObject(posicion).getJSONObject("value").getString("_rev"));
 
